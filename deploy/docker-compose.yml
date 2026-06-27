@@ -17,10 +17,12 @@ services:
     restart: unless-stopped
 
   app:
+    # En production, l'image est tirée depuis GHCR (publiée par la CI/CD).
+    # Le bloc build reste pour pouvoir construire en local si besoin.
+    image: ghcr.io/mikail-halil/cloudops-ticketing:latest
     build:
       context: ..                 # racine du dépôt (le Dockerfile fait COPY app/)
       dockerfile: app/Dockerfile
-    image: cloudops-ticketing:latest
     environment:
       DATABASE_URL: postgresql+psycopg://ticket:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant}@postgres:5432/ticketing
     depends_on:

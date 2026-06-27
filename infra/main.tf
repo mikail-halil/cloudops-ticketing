@@ -47,15 +47,19 @@ resource "azurerm_network_security_group" "nsg" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
+  # SSH ouvert (authentification par CLÉ uniquement ; root désactivé + fail2ban
+  # en complément). Ouverture nécessaire pour le déploiement automatique CI/CD
+  # depuis les runners GitHub Actions (IP non fixes).
+  # Limite assumee : en prod reelle on restreindrait via bastion / VPN / allowlist.
   security_rule {
-    name                       = "AllowSSHFromMe"
+    name                       = "AllowSSH"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = var.my_public_ip
+    source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
