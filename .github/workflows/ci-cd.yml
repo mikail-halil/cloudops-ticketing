@@ -40,7 +40,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}   # jeton intégré, pas de PAT
-      - name: Métadonnées (tags : sha + latest)
+      - name: Metadonnees image (tags sha + latest)
         id: meta
         uses: docker/metadata-action@v5
         with:
