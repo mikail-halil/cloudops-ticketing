@@ -1,0 +1,16 @@
+# Normalise les fins de ligne : LF partout (évite que CRLF Windows casse
+# les scripts shell / cloud-init exécutés sur la VM Linux).
+* text=auto eol=lf
+
+*.sh        text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.tf        text eol=lf
+Dockerfile  text eol=lf
+
+# Binaires (pas de conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.ico binary

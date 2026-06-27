@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+# Garantit que le package "app" est importable depuis la racine du dépôt,
+# que pytest soit lancé en local ou dans la CI GitHub Actions.
+pythonpath = ["."]
+testpaths = ["app/tests"]
