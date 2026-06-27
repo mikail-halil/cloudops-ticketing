@@ -1,0 +1,48 @@
+# Stack de PRODUCTION déployée sur la VM Azure.
+# Nginx (reverse proxy, port 80) -> FastAPI (app) -> PostgreSQL (volume persistant).
+# La supervision (Prometheus/Grafana/exporters) sera ajoutée en J5.
+#
+# Démarrage sur la VM (depuis la racine du dépôt cloné) :
+#   docker compose -f deploy/docker-compose.yml up -d --build
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ..                 # racine du dépôt (le Dockerfile fait COPY app/)
+      dockerfile: app/Dockerfile
+    image: cloudops-ticketing:latest
+    environment:
+      DATABASE_URL: postgresql+psycopg://ticket:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant}@postgres:5432/ticketing
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    # L'app n'est PAS exposée directement : seul Nginx l'atteint via le réseau interne Docker.
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ticket
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant}
+      POSTGRES_DB: ticketing
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticket -d ticketing"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
