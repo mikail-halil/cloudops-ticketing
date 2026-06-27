@@ -31,3 +31,6 @@ id_rsa*
 .DS_Store
 Thumbs.db
 .vscode/
+
+# --- Captures d'écran (preuves locales, hors dépôt) ---
+screens/
