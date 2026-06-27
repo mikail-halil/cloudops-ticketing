@@ -37,20 +37,22 @@ resource "azurerm_public_ip" "pip" {
 }
 
 # Pare-feu réseau : on n'ouvre QUE le strict nécessaire.
-#  - 22  (SSH)        : restreint à TON IP uniquement
-#  - 80  (HTTP)       : ouvert (appli + challenge Let's Encrypt)
-#  - 443 (HTTPS)      : ouvert (appli en TLS)
-#  - 3000 (Grafana)   : restreint à TON IP
-#  - 9090 (Prometheus): restreint à TON IP
+#  - 22  (SSH)        : source paramétrable (var.ssh_source_address) ; ouvert par
+#                       défaut pour le déploiement CI/CD (runners GitHub, IP non fixes)
+#  - 80  (HTTP)       : ouvert (application, via Nginx)
+#  - 3000 (Grafana)   : restreint à l'IP admin (var.my_public_ip)
+#  - 9090 (Prometheus): restreint à l'IP admin (var.my_public_ip)
+# HTTPS (443) est hors périmètre de cette V1 : la règle n'est pas ouverte.
 resource "azurerm_network_security_group" "nsg" {
   name                = "${var.prefix}-nsg"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
-  # SSH ouvert (authentification par CLÉ uniquement ; root désactivé + fail2ban
-  # en complément). Ouverture nécessaire pour le déploiement automatique CI/CD
-  # depuis les runners GitHub Actions (IP non fixes).
-  # Limite assumee : en prod reelle on restreindrait via bastion / VPN / allowlist.
+  # SSH : authentification par CLÉ uniquement (root désactivé + fail2ban + MaxAuthTries).
+  # Source paramétrable via var.ssh_source_address. Par défaut "*", car le déploiement
+  # CI/CD se fait en SSH depuis des runners GitHub Actions dont l'IP n'est pas fixe.
+  # Pour un accès admin strict, fixer var.ssh_source_address à votre IP /32 (la CI/CD
+  # nécessiterait alors un runner auto-hébergé ou un bastion).
   security_rule {
     name                       = "AllowSSH"
     priority                   = 100
@@ -59,7 +61,7 @@ resource "azurerm_network_security_group" "nsg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*"
+    source_address_prefix      = var.ssh_source_address
     destination_address_prefix = "*"
   }
 
@@ -71,18 +73,6 @@ resource "azurerm_network_security_group" "nsg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowHTTPS"
-    priority                   = 120
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }

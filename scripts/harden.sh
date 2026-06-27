@@ -7,7 +7,14 @@ echo "== 1/4 Pare-feu ufw =="
 apt-get update -y
 apt-get install -y ufw
 ufw allow OpenSSH              # 22 (avant enable, pour ne pas se couper l'accès)
-ufw allow 80,443,3000,9090/tcp
+ufw allow 80/tcp               # application web (via Nginx)
+# Grafana (3000) et Prometheus (9090) ne sont PAS destinés aux utilisateurs finaux.
+# On ne les ouvre qu'à l'IP de l'administrateur si elle est fournie (ADMIN_IP) ;
+# sinon ils restent fermés côté ufw (le NSG Azure les restreint déjà à l'IP admin).
+if [ -n "${ADMIN_IP:-}" ]; then
+  ufw allow from "$ADMIN_IP" to any port 3000 proto tcp
+  ufw allow from "$ADMIN_IP" to any port 9090 proto tcp
+fi
 ufw default deny incoming
 ufw default allow outgoing
 ufw --force enable

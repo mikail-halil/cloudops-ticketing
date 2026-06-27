@@ -34,6 +34,12 @@ variable "ssh_public_key_path" {
 }
 
 variable "my_public_ip" {
-  description = "Ton IP publique en /32 pour autoriser SSH (ex: 203.0.113.5/32). curl ifconfig.me"
+  description = "IP publique de l'administrateur en /32 pour restreindre l'accès à Grafana (3000) et Prometheus (9090). Obtenir avec : curl ifconfig.me"
   type        = string
+}
+
+variable "ssh_source_address" {
+  description = "Source autorisée pour SSH (port 22). \"*\" par défaut pour permettre le déploiement CI/CD depuis les runners GitHub (IP non fixes) ; mettre votre IP /32 pour un accès admin strict."
+  type        = string
+  default     = "*"
 }

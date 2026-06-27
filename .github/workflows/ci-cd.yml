@@ -77,6 +77,12 @@ jobs:
             cd deploy
             docker compose pull
             docker compose up -d
+            # Healthcheck avec ré-essais : après recréation du conteneur applicatif,
+            # Nginx peut mettre jusqu'à ~10 s (TTL du resolver) à réapprendre son adresse.
             sleep 5
-            curl -fsS http://localhost/health
-            echo "Déploiement OK"
+            for i in $(seq 1 12); do
+              if curl -fsS http://localhost/health; then echo " -> déploiement OK"; exit 0; fi
+              echo "tentative $i : application pas encore prête, nouvelle vérification dans 5 s..."
+              sleep 5
+            done
+            echo "Healthcheck en échec après plusieurs tentatives"; exit 1
