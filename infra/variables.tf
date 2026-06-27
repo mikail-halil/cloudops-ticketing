@@ -4,9 +4,9 @@ variable "subscription_id" {
 }
 
 variable "location" {
-  description = "Région Azure où déployer"
+  description = "Région Azure où déployer (Sweden Central : UE/RGPD, ouverte aux comptes d'essai)"
   type        = string
-  default     = "westeurope"
+  default     = "swedencentral"
 }
 
 variable "prefix" {
@@ -16,9 +16,9 @@ variable "prefix" {
 }
 
 variable "vm_size" {
-  description = "Taille de la VM (B2s = 2 vCPU / 4 Go, suffisant pour la stack)"
+  description = "Taille de la VM (B2s_v2 = 2 vCPU / 8 Go, burstable, dispo en Sweden Central)"
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_B2s_v2"
 }
 
 variable "admin_username" {

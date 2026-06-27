@@ -17,13 +17,14 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-}
 
-resource "azurerm_subnet" "subnet" {
-  name                 = "${var.prefix}-subnet"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.1.0/24"]
+  # Subnet défini EN LIGNE dans le VNet plutôt qu'en ressource séparée :
+  # cela évite la "race" de lecture du provider azurerm sur azurerm_subnet
+  # (le subnet existe mais est relu comme absent -> boucle créer/supprimer).
+  subnet {
+    name             = "${var.prefix}-subnet"
+    address_prefixes = ["10.0.1.0/24"]
+  }
 }
 
 # IP publique en SKU Standard (le SKU Basic est retiré par Azure depuis fin 2025).
@@ -114,7 +115,7 @@ resource "azurerm_network_interface" "nic" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet.id
+    subnet_id                     = one(azurerm_virtual_network.vnet.subnet[*].id)
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.pip.id
   }
