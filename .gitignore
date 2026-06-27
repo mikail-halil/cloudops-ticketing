@@ -18,6 +18,8 @@ venv/
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+*.tfplan
+tfplan
 crash.log
 
 # --- Clés SSH / certificats ---
