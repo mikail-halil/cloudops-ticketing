@@ -1,0 +1,29 @@
+groups:
+  - name: basic
+    rules:
+      # Une cible (service) ne répond plus depuis 1 min
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.instance }} (job {{ $labels.job }}) est DOWN"
+
+      # Charge CPU hôte > 80% pendant 2 min
+      - alert: HighCpuLoad
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU élevé (>80%) sur {{ $labels.instance }}"
+
+      # L'application ne répond plus à la sonde HTTP
+      - alert: AppProbeFailed
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "La sonde HTTP {{ $labels.instance }} échoue"
