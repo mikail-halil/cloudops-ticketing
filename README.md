@@ -5,8 +5,8 @@ gestion de tickets/incidents sur **Azure**, dans le cadre du Titre Professionnel
 **Administrateur Système DevOps (RNCP36061)**.
 
 > Architecture volontairement **mono-VM** (une machine, Docker Compose) : simple,
-> reproductible, défendable — pensée comme une **V1 évolutive** vers la haute
-> disponibilité / Kubernetes.
+> reproductible, défendable, et conçue comme une base **complète et évolutive** vers
+> la haute disponibilité / Kubernetes.
 
 ## Architecture
 

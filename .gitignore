@@ -34,3 +34,6 @@ Thumbs.db
 
 # --- Captures d'écran (preuves locales, hors dépôt) ---
 screens/
+
+# Backup local des captures non masquees (contient des secrets) - ne jamais committer
+docs/screens_opt_orig/
